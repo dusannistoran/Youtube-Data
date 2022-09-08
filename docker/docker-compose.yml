@@ -1,0 +1,178 @@
+version: '3.7'
+
+services:
+  nifi:
+    image: apache/nifi:1.15.3
+    ports:
+      - 8443:8443
+    volumes:
+      #- ./nifi/conf:/opt/nifi/nifi-current/conf
+      - nifi_conf:/opt/nifi/nifi-current/conf
+      - nifi_database_repository:/opt/nifi/nifi-current/database_repository
+      - nifi_flowfile_repository:/opt/nifi/nifi-current/flowfile_repository
+      - nifi_content_repository:/opt/nifi/nifi-current/content_repository
+      - nifi_provenance_repository:/opt/nifi/nifi-current/provenance_repository
+      - nifi_state:/opt/nifi/nifi-current/state
+      #- ./nifi/logs:/opt/nifi/nifi-current/logs
+      # uncomment the next line after copying the /conf directory from the container to your local directory to persist NiFi flows
+      - ./tmp:/opt/nifi/nifi-current/lib/tmp
+    environment:
+      - SINGLE_USER_CREDENTIALS_USERNAME=admin
+      - SINGLE_USER_CREDENTIALS_PASSWORD=nifi123admin
+
+  nifi-registry:
+    image: apache/nifi-registry:1.15.3
+    ports:
+      - 18080:18080
+    volumes:
+      - nifi_registry:/opt/nifi-registry/nifi-registry-current/
+
+  namenode:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    volumes:
+      - hadoop_namenode:/hadoop/dfs/name
+    environment:
+      - CLUSTER_NAME=test
+    env_file:
+      - ./hadoop.env
+    ports:
+      - 9870:9870
+      - 9000:9000
+
+  datanode1:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    depends_on:
+      - namenode
+    volumes:
+      - hadoop_datanode1:/hadoop/dfs/data
+    env_file:
+      - ./hadoop.env
+
+  datanode2:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    depends_on:
+      - namenode
+    volumes:
+      - hadoop_datanode2:/hadoop/dfs/data
+    env_file:
+      - ./hadoop.env
+
+  spark-master:
+    image: bde2020/spark-master:3.0.1-hadoop3.2
+    ports:
+      - 8080:8080
+      - 7077:7077
+    environment:
+      - PYSPARK_PYTHON=python3
+    env_file:
+      - ./hadoop.env
+    volumes:
+      - ./pyspark_batch:/spark/pyspark_batch
+      - postgres_driver:/postgres
+      - ../:/home/scala
+      - ./earthquakes:/spark/earthquakes
+
+  spark-worker1:
+    image: bde2020/spark-worker:3.0.1-hadoop3.2
+    depends_on:
+      - spark-master
+    environment:
+      - SPARK_MASTER=spark://spark-master:7077
+    ports:
+      - 18081:8081
+    env_file:
+      - ./hadoop.env
+
+  zookeeper:
+    image: zookeeper:3.4.9
+    ports:
+      - 2181:2181
+    environment:
+      ZOO_MY_ID: 1
+      ZOO_PORT: 2181
+      ZOO_SERVERS: server.1=zookeeper:2888:3888
+    volumes:
+      - zookeeper_vol:/data
+      - zookeeper_log_vol:/datalog
+
+  kafka:
+    image: confluentinc/cp-kafka:5.3.1
+    ports:
+      - 9092:9092
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: LISTENER_DOCKER_INTERNAL://kafka:19092,LISTENER_DOCKER_EXTERNAL://${DOCKER_HOST_IP:-127.0.0.1}:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: LISTENER_DOCKER_INTERNAL:PLAINTEXT,LISTENER_DOCKER_EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: LISTENER_DOCKER_INTERNAL
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      KAFKA_BROKER_ID: 1
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_LOG4J_LOGGERS: "kafka.controller=INFO,kafka.producer.async.DefaultEventHandler=INFO,state.change.logger=INFO"
+    volumes:
+      - kafka_vol:/var/lib/kafka/data
+    depends_on:
+      - zookeeper
+
+  postgres_db:
+    image: postgres:latest
+    volumes:
+      - metadata_data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=FoolishPassword
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=youtube_batch
+
+  metabase:
+    image: metabase/metabase
+    volumes:
+      - metabase_data:/metabase.db/
+    ports:
+      - 3000:3000
+      # wYatPufj5RjFrED
+
+  hue:
+    image: gethue/hue:20201111-135001
+    hostname: hue
+    dns: 8.8.8.8
+    ports:
+      - 8889:8888
+    volumes:
+      - ./conf.dist:/usr/share/hue/desktop/conf
+    depends_on:
+      - namenode
+
+  druid:
+    build:
+      context: ./
+      dockerfile: ./Dockerfile-druid
+    ports:
+      - 8081:8081
+      #- 8082:8082
+      #- 8083:8083
+      - 8888:8888
+      #- 8091:8091
+    env_file:
+      - ./druid-environment
+    volumes:
+      - druid_vol:/opt/druid/var
+      #- ./druid-conf-vol:/opt/druid
+
+volumes:
+  nifi_conf: {}
+  nifi_database_repository: {}
+  nifi_flowfile_repository: {}
+  nifi_content_repository: {}
+  nifi_provenance_repository: {}
+  nifi_state: {}
+  nifi_registry: {}
+  hadoop_namenode: {}
+  hadoop_datanode1: {}
+  hadoop_datanode2: {}
+  metadata_data: {}
+  postgres_driver: {}
+  zookeeper_vol: {}
+  zookeeper_log_vol: {}
+  kafka_vol: {}
+  metabase_data: {}
+  druid_vol: {}
