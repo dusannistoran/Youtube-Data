@@ -19,7 +19,4 @@ USER druid
 EXPOSE 8888/tcp
 EXPOSE 8081/tcp
 
-
-#CMD ["bash", "-c", "/opt/druid/bin/start-nano-quickstart"]
 CMD ["bash", "-c", "/opt/druid/bin/start-micro-quickstart"]
-#CMD ["bash", "-c", "/opt/druid/bin/start-small"]
