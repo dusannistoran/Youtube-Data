@@ -2,7 +2,7 @@ package com.example
 
 import com.typesafe.config.{Config, ConfigFactory}
 import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
-import org.apache.spark.sql.types.{IntegerType, LongType, StringType, StructField, StructType, TimestampType}
+import org.apache.spark.sql.types.{IntegerType, LongType, StringType, StructField, StructType}
 import org.slf4j.LoggerFactory
 import com.example.Utils.{extractMonth, getYear,getMonth}
 
