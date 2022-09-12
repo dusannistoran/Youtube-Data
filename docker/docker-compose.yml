@@ -129,7 +129,6 @@ services:
       - metabase_data:/metabase.db/
     ports:
       - 3000:3000
-      # wYatPufj5RjFrED
 
   hue:
     image: gethue/hue:20201111-135001
@@ -148,15 +147,11 @@ services:
       dockerfile: ./Dockerfile-druid
     ports:
       - 8081:8081
-      #- 8082:8082
-      #- 8083:8083
       - 8888:8888
-      #- 8091:8091
     env_file:
       - ./druid-environment
     volumes:
       - druid_vol:/opt/druid/var
-      #- ./druid-conf-vol:/opt/druid
 
 volumes:
   nifi_conf: {}
