@@ -63,8 +63,7 @@ object Utils {
   def extractMonth: UserDefinedFunction = {
     udf((key: String) => months.get(key))
   }
-
-  //import org.apache.spark.sql.functions.udf
+  
   import java.time.Instant
 
   def getYear: UserDefinedFunction = udf((epochMillisString: String) => {
