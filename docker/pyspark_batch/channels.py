@@ -22,12 +22,6 @@ quiet_logs(spark)
 channels_statistics_raw_df = \
     spark.read.json("hdfs://namenode:9000/youtube1/channels/*/statistics/*", multiLine=True)
 
-#print("channels_statistics_raw_df schema:")
-#channels_statistics_raw_df.printSchema()
-#channels_statistics_raw_df_count = channels_statistics_raw_df.count()
-#print("channels_statistics_raw_df count:", channels_statistics_raw_df_count)
-#channels_statistics_raw_df.show(channels_statistics_raw_df_count, False)
-
 channels_statistics_df = channels_statistics_raw_df \
     .withColumn("items", explode("items")) \
     .select("*", col("items.*")) \
@@ -47,7 +41,6 @@ print("channels_statistics_df schema:")
 channels_statistics_df.printSchema()
 channels_statistics_df_count = channels_statistics_df.count()
 print("channels_statistics_df count:", channels_statistics_df_count)
-#channels_statistics_df.show(channels_statistics_df_count, False)
 
 # write to Postgres
 channels_statistics_df.write \
