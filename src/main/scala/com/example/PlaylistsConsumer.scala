@@ -10,7 +10,6 @@ class PlaylistsConsumer(topicNifi: String, broker: String) {
 
   val configSpark: Config = ConfigFactory.load().getConfig("application.spark")
   val sparkCores: String = configSpark.getString("master")
-  //val HDFS_HOME: String = configSpark.getString("hdfsHome")
   val checkpoint: String = configSpark.getString("checkpointLocation")
 
   lazy val spark = SparkSession
@@ -18,7 +17,7 @@ class PlaylistsConsumer(topicNifi: String, broker: String) {
     .config("spark.speculation", "false")
     .config("checkpointLocation", s"$checkpoint")
     .master(s"$sparkCores")
-    .appName("consume playlists stream to console")
+    .appName("consume playlists stream to console and to druid")
     .getOrCreate()
 
   LoggerFactory.getLogger(spark.getClass)

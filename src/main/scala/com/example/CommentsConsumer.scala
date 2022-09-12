@@ -17,7 +17,7 @@ class CommentsConsumer(topicNifi: String, broker: String) {
     .config("spark.speculation", "false")
     .config("checkpointLocation", s"$checkpoint")
     .master(s"$sparkCores")
-    .appName("consume comments stream to console")
+    .appName("consume comments stream to console and to druid")
     .getOrCreate()
 
   LoggerFactory.getLogger(spark.getClass)
