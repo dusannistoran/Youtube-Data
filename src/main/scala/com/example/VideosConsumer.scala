@@ -50,7 +50,7 @@ class VideosConsumer(topicNifi: String, broker: String) {
   val valueDf = df.selectExpr("CAST(value AS STRING)")
 
   import org.apache.spark.sql.functions._
-  
+
   val dfWithColumns = valueDf
     .withColumn("value", from_json(col("value"), videosSchema))
 

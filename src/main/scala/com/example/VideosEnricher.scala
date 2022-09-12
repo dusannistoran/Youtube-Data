@@ -43,10 +43,6 @@ class VideosEnricher {
       .option("password", s"$postgresPassword")
       .load()
 
-    //videosDf.printSchema()
-    //println("There are " + videosDf.count() + " rows in videosDf.")
-    //videosDf.show()
-
     //enrich the videos table
     import org.apache.spark.sql.functions.udf
     val countFunction: UserDefinedFunction = udf((word: String, text: String) => {
