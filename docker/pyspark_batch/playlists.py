@@ -5,7 +5,6 @@
 
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import *
-from pyspark.sql.types import IntegerType, LongType, StringType
 
 def quiet_logs(sc):
     logger = sc._jvm.org.apache.log4j
@@ -21,13 +20,6 @@ quiet_logs(spark)
 
 playlists_raw_df \
     = spark.read.json("hdfs://namenode:9000/youtube1/channels/*/playlists/*", multiLine=True)
-'''
-print("playlists_raw_df schema:")
-playlists_raw_df.printSchema()
-playlists_raw_df_count = playlists_raw_df.count()
-print("playlists_raw_df count:", playlists_raw_df.count())
-playlists_raw_df.show(15, vertical=True)
-'''
 
 playlists_df = playlists_raw_df \
     .drop("etag", "kind", "nextPageToken", "pageInfo") \
