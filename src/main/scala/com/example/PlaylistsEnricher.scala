@@ -43,10 +43,6 @@ class PlaylistsEnricher {
       .option("password", s"$postgresPassword")
       .load()
 
-    //playlistsDf.printSchema()
-    //println("There are " + playlistsDf.count() + " rows in playlistsDf.")
-    //playlistsDf.show()
-
     //enrich the playlists table
     import org.apache.spark.sql.functions.udf
     val countWordsFunction: UserDefinedFunction = udf((text: String) => {
