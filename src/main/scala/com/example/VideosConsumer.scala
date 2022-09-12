@@ -10,7 +10,6 @@ class VideosConsumer(topicNifi: String, broker: String) {
 
   val configSpark: Config = ConfigFactory.load().getConfig("application.spark")
   val sparkCores: String = configSpark.getString("master")
-  //val HDFS_HOME: String = configSpark.getString("hdfsHome")
   val checkpoint: String = configSpark.getString("checkpointLocation")
 
   lazy val spark = SparkSession
@@ -18,7 +17,7 @@ class VideosConsumer(topicNifi: String, broker: String) {
     .config("spark.speculation", "false")
     .config("checkpointLocation", s"$checkpoint")
     .master(s"$sparkCores")
-    .appName("consume videos stream to console")
+    .appName("consume videos stream to console and to druid")
     .getOrCreate()
 
   LoggerFactory.getLogger(spark.getClass)
@@ -35,7 +34,6 @@ class VideosConsumer(topicNifi: String, broker: String) {
 
   val videosSchema = StructType(
       StructField("video_id", StringType) ::
-      //StructField("published_at", StringType) ::
       StructField("published_at", TimestampType) ::
         StructField("channel_id", StringType) ::
         StructField("channel_title", StringType) ::
@@ -43,7 +41,6 @@ class VideosConsumer(topicNifi: String, broker: String) {
         StructField("video_description", StringType) ::
         StructField("view_count", LongType) ::
         StructField("like_count", IntegerType) ::
-        //StructField("favorite_count", IntegerType) ::
         StructField("comment_count", IntegerType) ::
         StructField("category_id", IntegerType) ::
         StructField("category", StringType) ::
@@ -51,7 +48,9 @@ class VideosConsumer(topicNifi: String, broker: String) {
   )
 
   val valueDf = df.selectExpr("CAST(value AS STRING)")
+
   import org.apache.spark.sql.functions._
+  
   val dfWithColumns = valueDf
     .withColumn("value", from_json(col("value"), videosSchema))
 
