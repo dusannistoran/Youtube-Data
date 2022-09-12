@@ -1,10 +1,9 @@
 package com.example
 
-import com.example.Utils.extractCategory
 import com.typesafe.config.{Config, ConfigFactory}
 import org.apache.spark.sql.expressions.UserDefinedFunction
 import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
-import org.apache.spark.sql.types.{DoubleType, IntegerType, StringType, StructField, StructType, TimestampType}
+import org.apache.spark.sql.types.{IntegerType, StringType, StructField, StructType, TimestampType}
 import org.slf4j.LoggerFactory
 
 class CommentsUpdates(topicNifi: String, broker: String) {
@@ -17,9 +16,8 @@ class CommentsUpdates(topicNifi: String, broker: String) {
     .builder()
     .config("spark.speculation", "false")
     .config("checkpointLocation", s"$checkpoint")
-    //.config("spark.sql.streaming.forceDeleteTempCheckpointLocation", "true")
     .master(s"$sparkCores")
-    .appName("consume comments metrics updates to console")
+    .appName("consume comments metrics updates to console and to druid")
     .getOrCreate()
 
   LoggerFactory.getLogger(spark.getClass)
@@ -63,9 +61,6 @@ class CommentsUpdates(topicNifi: String, broker: String) {
 
   val dfWithColumns = valueDf
     .withColumn("value", from_json(col("value"), mySchema))
-
-  //println("dfWithColumns schema:")
-  //dfWithColumns.printSchema()
 
   val data = dfWithColumns
     .withColumn("current_time", current_timestamp())
@@ -122,6 +117,7 @@ class CommentsUpdates(topicNifi: String, broker: String) {
       .awaitTermination()
   }
 
+  /*
   def streamFromKafkaToPostgres(): Unit = {
 
     println("enrichedDf schema:")
@@ -143,5 +139,6 @@ class CommentsUpdates(topicNifi: String, broker: String) {
       .start()
       .awaitTermination()
   }
+   */
 
 }
