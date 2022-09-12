@@ -1,8 +1,7 @@
 package com.example
 
 import com.typesafe.config.{Config, ConfigFactory}
-import org.apache.spark.sql.streaming.Trigger
-import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
+import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.types.{IntegerType, LongType, StringType, StructField, StructType, TimestampType}
 import org.slf4j.LoggerFactory
 
@@ -10,7 +9,6 @@ class ChannelsConsumer(topic: String, broker: String) {
 
   val configSpark: Config = ConfigFactory.load().getConfig("application.spark")
   val sparkCores: String = configSpark.getString("master")
-  //val HDFS_HOME: String = configSpark.getString("hdfsHome")
   val checkpoint: String = configSpark.getString("checkpointLocation")
 
   lazy val spark = SparkSession
@@ -65,8 +63,6 @@ class ChannelsConsumer(topic: String, broker: String) {
       .format("console")
       .outputMode("append")
       .option("truncate", "false")
-      //.trigger(Trigger.Once())
-      //.trigger(Trigger.ProcessingTime("49 seconds"))
       .start()
       .awaitTermination()
   }
