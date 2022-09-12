@@ -3,7 +3,7 @@ package com.example
 import com.typesafe.config.{Config, ConfigFactory}
 import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
 import org.apache.spark.sql.expressions.UserDefinedFunction
-import org.apache.spark.sql.types.{ArrayType, IntegerType, LongType, StringType, StructField, StructType, TimestampType}
+import org.apache.spark.sql.types.{IntegerType, StringType, StructField, StructType, TimestampType}
 import org.slf4j.LoggerFactory
 
 class PlaylistsUpdates(topicNifi: String, broker: String) {
@@ -16,9 +16,8 @@ class PlaylistsUpdates(topicNifi: String, broker: String) {
     .builder()
     .config("spark.speculation", "false")
     .config("checkpointLocation", s"$checkpoint")
-    //.config("spark.sql.streaming.forceDeleteTempCheckpointLocation", "true")
     .master(s"$sparkCores")
-    .appName("consume channels metrics updates to console")
+    .appName("consume channels metrics updates to console and to druid")
     .getOrCreate()
 
   LoggerFactory.getLogger(spark.getClass)
@@ -56,9 +55,6 @@ class PlaylistsUpdates(topicNifi: String, broker: String) {
   val dfWithColumns = valueDf
     .withColumn("value", from_json(col("value"), mySchema))
 
-  //println("dfWithColumns schema:")
-  //dfWithColumns.printSchema()
-
   val data = dfWithColumns
     .withColumn("current_time", current_timestamp())
     .withColumn("playlist_id", dfWithColumns.col("value.id"))
@@ -95,9 +91,6 @@ class PlaylistsUpdates(topicNifi: String, broker: String) {
 
   def streamFromKafkaToDruid(topicDruid: String): Unit = {
 
-    //println("data schema:")
-    //data.printSchema()
-
     //enrich the playlists table
     import org.apache.spark.sql.functions.udf
     val countWordsFunction: UserDefinedFunction = udf((text: String) => {
@@ -105,6 +98,7 @@ class PlaylistsUpdates(topicNifi: String, broker: String) {
       val words = cleanText.split(" ")
       words.length
     })
+
     val enrichedDf = data
       .withColumn("playlist_title_length", countWordsFunction(col("playlist_title")))
 
@@ -123,6 +117,7 @@ class PlaylistsUpdates(topicNifi: String, broker: String) {
       .awaitTermination()
   }
 
+  /*
   def streamFromKafkaToPostgres(today: String): Unit = {
 
     println("data schema:")
@@ -154,5 +149,6 @@ class PlaylistsUpdates(topicNifi: String, broker: String) {
       .start()
       .awaitTermination()
   }
+   */
 
 }
