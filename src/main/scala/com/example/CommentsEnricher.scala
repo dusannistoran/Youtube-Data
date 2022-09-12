@@ -15,8 +15,8 @@ class CommentsEnricher {
   val configPostgres: Config = ConfigFactory.load().getConfig("application.postgres")
   val postgresDriver: String = configPostgres.getString("driver")
   val postgresUrl: String = configPostgres.getString("url")
-  val postgresDbtableComments: String = configPostgres.getString("dbtableComments")
-  val postgresDbtableCommentsEnriched: String = configPostgres.getString("dbtableCommentsEnriched")
+  //val postgresDbtableComments: String = configPostgres.getString("dbtableComments")
+  //val postgresDbtableCommentsEnriched: String = configPostgres.getString("dbtableCommentsEnriched")
   val postgresUser: String = configPostgres.getString("user")
   val postgresPassword: String = configPostgres.getString("password")
 
