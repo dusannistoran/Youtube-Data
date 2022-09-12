@@ -19,11 +19,6 @@ libraryDependencies ++= {
     "org.apache.spark" %% "spark-sql" % sparkVer,
     "org.apache.spark" %% "spark-streaming" % sparkVer,
     "org.apache.spark" %% "spark-sql-kafka-0-10" % sparkVer,
-    //"com.databricks" %% "spark-avro" % sparkVer,
-    //"com.google.apis" % "google-api-services-youtube" % "v3-rev174-1.22.0",
-    //"com.lihaoyi" %% "requests" % "0.7.0",
-    //"com.lihaoyi" %% "upickle" % "0.7.1",
-    //"org.json4s" %% "json4s-native" % "4.0.0",
     "org.postgresql" % "postgresql" % "42.2.5",
     "com.typesafe" % "config" % "1.4.1"
   )

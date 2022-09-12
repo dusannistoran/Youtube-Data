@@ -63,7 +63,7 @@ object Utils {
   def extractMonth: UserDefinedFunction = {
     udf((key: String) => months.get(key))
   }
-  
+
   import java.time.Instant
 
   def getYear: UserDefinedFunction = udf((epochMillisString: String) => {
