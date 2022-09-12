@@ -3,7 +3,7 @@ package com.example
 import com.example.Utils.{extractMonth, getMonth, getYear}
 import com.typesafe.config.{Config, ConfigFactory}
 import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
-import org.apache.spark.sql.types.{DoubleType, IntegerType, StringType, StructField, StructType}
+import org.apache.spark.sql.types.{IntegerType, StringType, StructField, StructType}
 import org.slf4j.LoggerFactory
 
 class CommentsYearMonth(topicNifi: String, broker: String) {
